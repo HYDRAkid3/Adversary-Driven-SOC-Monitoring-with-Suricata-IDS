@@ -2,83 +2,56 @@
 
 ## Objective
 
-Deploy a dual-NIC Suricata IDS VM operating as a routing inspection gateway between attacker and victim networks.
+Deploy Suricata IDS as a dual-NIC routing inspection gateway between attacker and victim networks.
 
 ---
 
-## Lab Environment
+## Suricata Engine Startup
 
-Attacker:
-Kali Linux
-IP: 192.168.100.10
-Gateway: 192.168.100.1
+![Engine Started](../assets/screenshots/1%20Infrastructure%20Setup/01_suricata_engine_started.png)
 
-IDS:
-Suricata VM
-enp0s3 → 192.168.100.1 (SOC-IN)
-enp0s8 → 192.168.200.1 (SOC-OUT)
-
-Victim:
-Ubuntu DVWA Server
-IP: 192.168.200.10
-Gateway: 192.168.200.1
+Suricata engine successfully initialized.
 
 ---
 
-## Network Segmentation
+## Interface Verification
 
-SOC-IN  : 192.168.100.0/24  
-SOC-OUT : 192.168.200.0/24  
+![Interfaces Up](../assets/screenshots/1%20Infrastructure%20Setup/02_suricata_interfaces_up.png)
 
-Traffic Flow:
-Kali → Suricata → DVWA
+Both interfaces (enp0s3 & enp0s8) confirmed active.
 
 ---
 
-## Enable IP Forwarding
+## IP Forwarding Enabled
 
-```bash
-sudo sysctl -w net.ipv4.ip_forward=1
-```
+![IP Forwarding](../assets/screenshots/1%20Infrastructure%20Setup/03_ip_forwarding_enabled.png)
 
-Permanent change:
-
-```bash
-sudo nano /etc/sysctl.conf
-```
-
-Add:
-net.ipv4.ip_forward=1
+Kernel IP forwarding enabled to allow routing inspection.
 
 ---
 
-## Validation
+## Configuration Validation
 
-From Kali:
+![Config Validation](../assets/screenshots/1%20Infrastructure%20Setup/04_config_validation_success.png)
 
-```bash
-ping 192.168.200.10
-```
-
-From Suricata:
+Suricata configuration successfully validated using:
 
 ```bash
-tcpdump -i enp0s3
-tcpdump -i enp0s8
+sudo suricata -T -c /etc/suricata/suricata.yaml
 ```
 
 ---
 
-## Evidence
+## Runtime Threads
 
-![Topology](../assets/screenshots/infrastructure/01-topology.png)
+![Engine Threads](../assets/screenshots/1%20Infrastructure%20Setup/05_engine_runtime_threads.png)
 
-![IP Forwarding](../assets/screenshots/infrastructure/02-ip-forwarding.png)
+Suricata running in IDS mode with active packet processing threads.
 
 ---
 
 ## Findings
 
-- Traffic successfully routed via Suricata
-- Network segmentation enforced
-- IDS positioned as inspection gateway
+- Dual NIC routing configuration operational
+- Suricata positioned inline as inspection gateway
+- Traffic routing successfully enforced
