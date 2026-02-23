@@ -2,44 +2,36 @@
 
 ## Objective
 
-Confirm all traffic between attacker and victim passes through Suricata.
+Confirm all attacker-to-victim traffic traverses Suricata.
 
 ---
 
-## ICMP Test
+## Kali Routing Table
 
-From Kali:
+![Kali Routing](../assets/screenshots/3%20Network%20Path%20Validation/01_kali_routing_table.png)
 
-```bash
-ping 192.168.200.10
-```
-
-On Suricata:
-
-```bash
-tcpdump -i enp0s3 icmp
-tcpdump -i enp0s8 icmp
-```
+Kali gateway correctly pointing to Suricata.
 
 ---
 
-## Expected Behavior
+## Packet Capture Validation
 
-- ICMP visible on both interfaces
-- Alert generated if ICMP rule exists
+![Packet Capture](../assets/screenshots/3%20Network%20Path%20Validation/02_packet_capture_validation.png)
+
+Traffic visible on Suricata interfaces.
 
 ---
 
-## Evidence
+## Raw HTTP SQLi Traffic (tcpdump)
 
-![ICMP Traffic](../assets/screenshots/network-path/01-icmp.png)
+![Raw SQLi](../assets/screenshots/3%20Network%20Path%20Validation/03_tcpdump_raw_http_sqli.png)
 
-![fast.log ICMP Alert](../assets/screenshots/network-path/02-fastlog-icmp.png)
+Payload inspection validated at packet level.
 
 ---
 
 ## Findings
 
-- Traffic confirmed flowing through IDS
-- Routing enforcement validated
-- Inspection path verified
+- Routing enforcement confirmed
+- Suricata successfully intercepting traffic
+- Traffic inspection validated using tcpdump
