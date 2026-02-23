@@ -2,19 +2,24 @@
 
 ## Objective
 
-Validate Suricata rule loading, confirm ET Open baseline deployment, and demonstrate custom rule development using local.rules.
+Validate Suricata’s rule engine configuration, confirm ET Open baseline rule deployment, and demonstrate custom detection rule development using `local.rules`.
 
 ---
 
-## Rule Sources
+## Rule Source Configuration
 
 Suricata is configured to load rules from:
 
-default-rule-path: /var/lib/suricata/rules
+default-rule-path:
+```
+/var/lib/suricata/rules
+```
 
-Rule files:
-- suricata.rules  (ET Open baseline rules)
-- local.rules     (Custom lab rules)
+Rule files loaded:
+- suricata.rules  → ET Open baseline rule set  
+- local.rules     → Custom lab detection rules  
+
+This ensures a layered detection model combining community signatures with lab-specific logic.
 
 ---
 
@@ -24,24 +29,29 @@ Rule files:
 
 ![ET Rule Count](../assets/screenshots/2%20Rule%20Engine/04_et_rule_count.png)
 
-Approximately 48,000+ alert rules are loaded from the ET Open rule set.
+Suricata loaded approximately **48,000+ alert rules** from the ET Open rule set.
 
-This confirms the IDS is operating with a real-world detection baseline.
+This confirms:
+
+- ET Open successfully installed
+- Real-world detection signatures active
+- IDS operating beyond minimal configuration
 
 ---
 
 ## Configuration Validation
 
-Command used:
+Rule parsing and configuration validation performed using:
 
 ```bash
 sudo suricata -T -c /etc/suricata/suricata.yaml
 ```
 
-This verifies:
-- Rule parsing success
+Validation ensures:
+
 - No syntax errors
-- All rule files properly loaded
+- All rule files successfully parsed
+- Detection engine initialized correctly
 
 ---
 
@@ -49,31 +59,31 @@ This verifies:
 
 ![Local Rules Content](../assets/screenshots/2%20Rule%20Engine/05_local_rules_content.png)
 
-Custom rules were developed to support lab-based detection scenarios:
+Custom rules were developed to support controlled lab validation scenarios:
 
-- ICMP path validation
-- SYN scan detection
-- SQL injection indicators
-- Cross-site scripting indicators
+- ICMP routing path validation
+- SYN scan detection (threshold-based)
+- SQL Injection indicators
+- Cross-Site Scripting (XSS) indicators
 
-These rules supplement ET Open and allow controlled detection validation.
+These rules complement the ET Open baseline signatures and provide deterministic detection behavior during testing.
 
 ---
 
 ## Detection Strategy
 
-The lab uses a layered approach:
+The rule engine operates using a layered approach:
 
-1. ET Open baseline signatures (real-world attack detection)
-2. Custom local rules (lab-specific validation rules)
+1. ET Open baseline rules (broad threat detection)
+2. Custom local rules (lab-focused validation)
 
-This mirrors real SOC environments where baseline signatures are combined with organization-specific detection logic.
+This mirrors real-world SOC deployments where community signatures are supplemented with organization-specific detection logic.
 
 ---
 
 ## Findings
 
-- ET Open successfully installed and active
-- 48k+ alert rules available
-- Custom rules parsed and loaded
-- Rule engine operating correctly
+- ET Open rule set successfully installed
+- 48k+ alert rules active
+- Custom rules properly parsed and loaded
+- Rule engine validated and operational
