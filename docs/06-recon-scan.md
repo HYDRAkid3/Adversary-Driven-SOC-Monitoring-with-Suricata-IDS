@@ -2,31 +2,21 @@
 
 ## Objective
 
-Simulate network scanning using Nmap and validate detection.
+Simulate SYN scan using Nmap and validate detection.
 
 ---
 
-## Command Used
+## Nmap SYN Scan
 
-```bash
-nmap -sS 192.168.200.10
-```
+![Nmap Scan](../assets/screenshots/6%20Recon%20Scan/01_nmap_syn_scan.png)
 
----
-
-## Log Validation
-
-```bash
-sudo tail -n 5 /var/log/suricata/fast.log
-```
+Reconnaissance activity initiated from Kali.
 
 ---
 
-## Evidence
+## Detection Validation
 
-![Nmap Scan](../assets/screenshots/recon/01-nmap-scan.png)
-
-![fast.log Recon](../assets/screenshots/recon/02-fastlog-recon.png)
+Suricata flagged scanning behavior.
 
 ---
 
@@ -39,5 +29,5 @@ T1046 – Network Service Scanning
 ## Findings
 
 - SYN scan detected
-- Suricata flagged reconnaissance behavior
-- IDS monitoring validated
+- IDS monitoring confirmed
+- Recon behavior successfully logged
