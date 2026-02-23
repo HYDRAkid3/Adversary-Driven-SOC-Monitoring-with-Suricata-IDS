@@ -215,9 +215,3 @@ Attack Simulation
 This lab demonstrates practical detection engineering beyond basic IDS setup.
 
 ---
-
-## Author
-
-Harshit Krishna  
-MS Cybersecurity – University of Delaware  
-SOC Analyst | Detection Engineering Focus
