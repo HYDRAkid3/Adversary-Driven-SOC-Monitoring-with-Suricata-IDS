@@ -1,13 +1,27 @@
-# ============================================================
 # Suricata IDS Detection Lab - Custom Rules
-# Author: Harshit Krishna
-# Purpose: Lab detection validation rules
-# ============================================================
 
+Author: Harshit Krishna  
+Purpose: Lab detection validation rules for Suricata IDS
 
-# ------------------------------------------------------------
-# 1. ICMP Path Validation
-# ------------------------------------------------------------
+---
+
+## Overview
+
+This file contains custom Suricata rules created to support controlled attack simulations within the lab environment.
+
+These rules supplement the ET Open baseline rule set and are designed for:
+
+- ICMP path validation
+- SYN scan detection
+- SQL Injection detection
+- Cross-Site Scripting (XSS) detection
+
+---
+
+## Custom Rules
+
+```rules
+# ICMP Path Validation
 alert icmp any any -> any any (
     msg:"LAB ICMP Traffic Observed (Path Validation)";
     itype:8;
@@ -16,10 +30,7 @@ alert icmp any any -> any any (
     rev:1;
 )
 
-
-# ------------------------------------------------------------
-# 2. SYN Scan Detection (Threshold-Based)
-# ------------------------------------------------------------
+# SYN Scan Detection
 alert tcp any any -> 192.168.200.0/24 any (
     msg:"LAB Possible SYN Scan Detected";
     flags:S;
@@ -30,12 +41,7 @@ alert tcp any any -> 192.168.200.0/24 any (
     rev:1;
 )
 
-
-# ------------------------------------------------------------
-# 3. SQL Injection Detection
-# ------------------------------------------------------------
-
-# OR 1=1 pattern
+# SQL Injection - OR 1=1
 alert http any any -> 192.168.200.10 80 (
     msg:"LAB SQL Injection Attempt - OR 1=1 Pattern";
     flow:to_server,established;
@@ -46,7 +52,7 @@ alert http any any -> 192.168.200.10 80 (
     rev:1;
 )
 
-# UNION SELECT pattern
+# SQL Injection - UNION
 alert http any any -> 192.168.200.10 80 (
     msg:"LAB SQL Injection Attempt - UNION SELECT";
     flow:to_server,established;
@@ -57,12 +63,7 @@ alert http any any -> 192.168.200.10 80 (
     rev:1;
 )
 
-
-# ------------------------------------------------------------
-# 4. Cross-Site Scripting (XSS) Detection
-# ------------------------------------------------------------
-
-# <script> tag detection
+# XSS Detection - Script Tag
 alert http any any -> 192.168.200.10 80 (
     msg:"LAB XSS Attempt - Script Tag Detected";
     flow:to_server,established;
@@ -73,7 +74,7 @@ alert http any any -> 192.168.200.10 80 (
     rev:1;
 )
 
-# Encoded script detection
+# XSS Detection - Encoded Script
 alert http any any -> 192.168.200.10 80 (
     msg:"LAB Encoded XSS Attempt Detected";
     flow:to_server,established;
@@ -83,3 +84,12 @@ alert http any any -> 192.168.200.10 80 (
     sid:1000031;
     rev:1;
 )
+```
+
+---
+
+## Notes
+
+These rules are intentionally scoped to the lab network and target DVWA running on 192.168.200.10.
+
+They are designed for controlled detection validation and do not replace enterprise-grade signature sets.
