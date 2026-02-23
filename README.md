@@ -1,44 +1,76 @@
 # Suricata IDS Detection Lab
-Routing Inspection Gateway | Attack Simulation | Detection Engineering
+Routing Inspection Gateway | Dual-NIC Architecture | Detection Engineering
 
 ---
 
 ## Overview
 
-This project demonstrates a VirtualBox-based SOC lab where Suricata IDS operates as a dual-NIC routing inspection gateway, inspecting traffic between:
+This project demonstrates a VirtualBox-based SOC lab where Suricata IDS operates as a **dual-NIC routing inspection gateway**, inspecting traffic between isolated attacker and victim networks.
 
-- Attacker: Kali Linux  
-- IDS: Suricata 7.x (Routing Gateway)  
-- Victim: Ubuntu (DVWA Web Server)
-
-The lab validates:
-
-- Network path enforcement
-- Custom rule creation
-- Attack-driven detection
-- Alert validation in fast.log and eve.json
-- MITRE ATT&CK mapping
+The lab simulates real-world attack scenarios and validates detection using structured logging and packet inspection.
 
 ---
 
-## Lab Architecture
+## Architecture Diagram
 
-![Architecture](assets/diagrams/architecture.png)
+![Suricata Architecture](assets/diagrams/Suricata%20IDS%20Architecture%20Diagram.png)
 
-### Network Segmentation
+---
 
-SOC-IN  : 192.168.100.0/24  
-SOC-OUT : 192.168.200.0/24  
+## Lab Architecture Explanation
 
-Traffic Flow:
-Kali → Suricata (Inspection Gateway) → DVWA
+### VirtualBox Host
 
-Suricata Interfaces:
-- enp0s3 → SOC-IN (192.168.100.1)
-- enp0s8 → SOC-OUT (192.168.200.1)
+Two Internal Networks are configured:
 
-IP Forwarding enabled:
-net.ipv4.ip_forward = 1
+- SOC-IN  → 192.168.100.0/24  
+- SOC-OUT → 192.168.200.0/24  
+
+---
+
+### Attacker Machine (Kali Linux)
+
+- Interface: SOC-IN  
+- IP: 192.168.100.10  
+- Gateway: 192.168.100.1 (Suricata)  
+
+Used to simulate:
+
+- ICMP test traffic
+- Nmap SYN scanning
+- SQL Injection
+- Reflected XSS
+
+---
+
+### Suricata IDS VM (Routing Inspection Gateway)
+
+Dual Network Interfaces:
+
+- enp0s3 → SOC-IN → 192.168.100.1  
+- enp0s8 → SOC-OUT → 192.168.200.1  
+
+Key Configuration:
+
+- net.ipv4.ip_forward = 1
+- IDS Mode Deployment
+- Packet Capture Engine Enabled
+
+Traffic Path Enforced:
+
+Kali → Suricata → DVWA
+
+All traffic between networks must traverse the IDS.
+
+---
+
+### Victim Machine (Ubuntu + DVWA)
+
+- Interface: SOC-OUT  
+- IP: 192.168.200.10  
+- Service: Apache + DVWA (HTTP)
+
+Target for simulated web-based attacks.
 
 ---
 
@@ -49,7 +81,6 @@ net.ipv4.ip_forward = 1
 - Ubuntu Server
 - DVWA
 - Nmap
-- THC-Hydra
 - tcpdump
 - VirtualBox (Dual Internal Networks)
 
@@ -67,12 +98,11 @@ Suricata-IDS-Detection-Lab/
 │   ├── 03-network-path-validation.md
 │   ├── 04-sqli-case-study.md
 │   ├── 05-xss-case-study.md
-│   ├── 06-recon-scan.md
-│   └── 07-ssh-bruteforce-case-study.md
+│   └── 06-recon-scan.md
 │
 ├── assets/
 │   ├── diagrams/
-│   │   └── architecture.png
+│   │   └── Suricata IDS Architecture Diagram.png
 │   └── screenshots/
 │
 ├── rules/
@@ -90,91 +120,104 @@ Suricata-IDS-Detection-Lab/
 
 ## Detection Scenarios
 
-### 1. Network Path Validation
-- ICMP test traffic
-- TCP validation via tcpdump
-- Verified routed inspection
-
-### 2. Reconnaissance Scan
-- Nmap SYN scan
-- Service discovery
-- Suricata alert validation
-
-MITRE Technique:
-T1046 – Network Service Scanning
+### 1. Infrastructure Deployment
+- Dual-NIC configuration
+- Routing enforcement validation
+- Engine runtime verification
 
 ---
 
-### 3. SQL Injection (DVWA)
+### 2. Rule Engine Validation
+- Custom rule creation
+- Rule parsing verification
+- Alert trigger validation
 
-- Exploit simulation via DVWA
-- Custom Suricata rule detection
-- fast.log alert validation
-- eve.json structured output verification
+---
 
-MITRE Technique:
+### 3. Network Path Validation
+- Routing table verification
+- Packet inspection using tcpdump
+- Traffic visibility on both interfaces
+
+---
+
+### 4. SQL Injection Detection
+
+- SQLi payload executed against DVWA
+- HTTP inspection rule triggered
+- Alert validation via fast.log
+- Structured event validation via eve.json
+
+MITRE ATT&CK:
 T1190 – Exploit Public-Facing Application
 
 ---
 
-### 4. Cross-Site Scripting (XSS)
+### 5. Cross-Site Scripting (XSS) Detection
 
-- Reflected XSS attack
-- HTTP inspection
-- Payload detection via custom rule
+- Reflected XSS payload testing
+- HTTP content inspection
+- Alert generation and JSON validation
 
-MITRE Technique:
+MITRE ATT&CK:
 T1059 – Command and Scripting Interpreter
 
 ---
 
-### 5. SSH Brute Force (Hydra)
+### 6. Reconnaissance Detection
 
-- SSH service discovery via Nmap
-- Credential brute force using THC-Hydra
-- Suricata detection validation
+- Nmap SYN scan simulation
+- Service discovery detection
+- IDS monitoring validation
 
-MITRE Technique:
-T1110 – Brute Force
+MITRE ATT&CK:
+T1046 – Network Service Scanning
 
 ---
 
-## Evidence Collection
+## Evidence Collection & Validation
 
-Detection proof validated using:
+Alerts verified using:
 
 - /var/log/suricata/fast.log
 - /var/log/suricata/eve.json
-- tcpdump (packet validation on enp0s3)
+- tcpdump packet captures (interface-level validation)
 
-Sample Alert (fast.log):
+Example validation command:
 
-[**] [1:1000005:1] SSH Brute Force Attempt [**]
-
-Structured JSON validation via:
-
-sudo tail -n 5 /var/log/suricata/eve.json
+```bash
+sudo tail -n 10 /var/log/suricata/fast.log
+```
 
 ---
 
 ## Key Engineering Concepts Demonstrated
 
 - IDS deployment in routed inspection mode
-- Dual-NIC gateway enforcement
-- Custom rule creation and testing
-- Attack simulation with validation
-- Detection evidence documentation
-- MITRE ATT&CK mapping
-- SOC-style alert investigation workflow
+- Dual-NIC gateway architecture
+- Network segmentation enforcement
+- Custom rule development and validation
+- Attack simulation with detection verification
+- Structured JSON log analysis
+- MITRE ATT&CK technique mapping
 
 ---
 
-## Why This Project Matters
+## Detection Workflow Demonstrated
 
-This lab simulates real SOC detection workflows:
+Attack Simulation  
+→ Traffic Inspection  
+→ Rule Trigger  
+→ Alert Logging  
+→ Evidence Validation  
+→ Technique Mapping  
 
-Attack → Traffic Inspection → Alert Trigger → Log Validation → Technique Mapping
-
-It demonstrates practical detection engineering beyond theoretical IDS configuration.
+This lab demonstrates practical detection engineering beyond basic IDS setup.
 
 ---
+
+## Author
+
+Harshit Krishna  
+MS Cybersecurity – University of Delaware  
+SOC Analyst | Detection Engineering Focus
