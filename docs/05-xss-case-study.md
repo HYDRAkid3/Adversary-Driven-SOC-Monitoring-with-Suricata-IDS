@@ -1,38 +1,32 @@
-# 05 - Cross-Site Scripting (XSS) Case Study
+# 05 - XSS Case Study
 
 ## Objective
 
-Simulate reflected XSS attack and validate detection via Suricata.
+Simulate reflected XSS attack and validate detection.
 
 ---
 
-## Attack Payload
+## XSS Payload Capture (tcpdump)
 
-<script>alert(1)</script>
+![XSS Packet](../assets/screenshots/5%20XSS%20Case%20Study/01_tcpdump_xss_payload.png)
 
----
-
-## Custom Rule
-
-```
-alert http any any -> any any (msg:"XSS Attempt"; content:"<script>"; sid:1000003; rev:1;)
-```
+Payload inspection at network layer.
 
 ---
 
-## Log Validation
+## Suricata Alert (fast.log)
 
-```bash
-sudo tail -n 5 /var/log/suricata/fast.log
-```
+![fast.log XSS](../assets/screenshots/5%20XSS%20Case%20Study/02_fast_log_xss_alert.png)
+
+Custom rule triggered successfully.
 
 ---
 
-## Evidence
+## eve.json Structured Alert
 
-![XSS Payload](../assets/screenshots/xss/01-xss-payload.png)
+![eve.json XSS](../assets/screenshots/5%20XSS%20Case%20Study/03_eve_json_xss_alert.png)
 
-![fast.log XSS](../assets/screenshots/xss/02-fastlog-xss.png)
+Structured JSON event generated.
 
 ---
 
@@ -44,6 +38,6 @@ T1059 – Command and Scripting Interpreter
 
 ## Findings
 
-- HTTP payload inspection successful
-- Alert generated in real-time
-- Detection confirmed via fast.log
+- Reflected XSS detected
+- HTTP inspection confirmed
+- Structured logging validated
