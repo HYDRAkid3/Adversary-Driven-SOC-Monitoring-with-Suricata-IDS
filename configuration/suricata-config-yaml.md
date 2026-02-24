@@ -39,6 +39,7 @@ This lab requires Suricata to monitor traffic crossing the boundary between SOC-
 - enp0s8 (SOC-OUT side, 192.168.200.1)
 
 Interface state proof (dual-homed gateway):
+
 ![Suricata Interfaces Up](../evidence/screenshots/01_Infrastructure_Setup/03_suricata_interfaces_up.png)
 
 In `suricata.yaml`, packet acquisition is configured so Suricata can capture traffic from the relevant interfaces. Depending on your environment, capture can be implemented using `af-packet`, `pcap`, or another supported capture method.
