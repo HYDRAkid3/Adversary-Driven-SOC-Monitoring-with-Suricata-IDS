@@ -134,7 +134,7 @@ Validates:
 
 ## DVWA Security Level
 
-![DVWA Security Low](../evidence/screenshots/05_SQLi_Case_Study/00_dvwa_security_level_low.png)
+![DVWA Security Level](../evidence/screenshots/05_SQLi_Case_Study/00_dvwa_security_level_configured_low.png)
 
 Ensures:
 - Vulnerability exposure enabled
