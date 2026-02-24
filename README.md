@@ -1,198 +1,219 @@
 # Suricata IDS Detection Lab  
-Network Segmentation | Detection Engineering | Attack Simulation
+### Inline Network Inspection | Detection Engineering | Recon + Web Attack Validation
 
 ---
 
 ## Overview
 
-This project demonstrates the deployment of **Suricata 7 IDS as a routing inspection gateway** in a segmented lab environment.
+This project demonstrates a fully segmented, dual-homed Suricata IDS deployment built in a controlled virtual lab environment.
 
-The lab simulates:
+The objective of this lab was to:
 
-- An attacker performing reconnaissance and exploitation
-- A vulnerable web server (DVWA)
-- A network-based detection engine inspecting all traffic between segments
+- Deploy Suricata as an inline routing inspection gateway
+- Enforce inter-subnet traffic inspection
+- Validate detection of reconnaissance activity
+- Detect SQL Injection and XSS attacks
+- Analyze alerts using both fast.log and structured eve.json output
+- Demonstrate practical detection engineering skills
 
-The objective is to validate detection logic using:
-
-- ET Open baseline signatures
-- Custom Suricata rules
-- Packet-level inspection
-- Structured event analysis
-- MITRE ATT&CK mapping
+This lab simulates a real-world SOC monitoring boundary.
 
 ---
 
-## Threat Model
+# Lab Network Architecture
 
-This lab models a segmented internal network where:
+Below is the actual network architecture used in this lab:
 
-- An attacker machine (Kali Linux) attempts reconnaissance and exploitation.
-- A vulnerable web application (DVWA) resides in a separate subnet.
-- Suricata operates as an inline routing gateway between segments.
-
-Attack surface:
-- ICMP (path validation)
-- TCP SYN scans
-- HTTP (SQL Injection / XSS payloads)
-
-Detection objective:
-Identify reconnaissance and exploitation attempts at the network boundary before they reach the application layer.
+![Suricata IDS Dual Network Architecture](evidence/screenshots/00_Architecture/01_suricata_ids_dual_network_architecture.png)
 
 ---
 
-## Architecture
+## Network Design Summary
 
-Suricata operates with dual network interfaces:
+Two isolated internal networks were created using VirtualBox:
 
-- SOC-IN  → 192.168.100.0/24  
-- SOC-OUT → 192.168.200.0/24  
+- **SOC-IN** → 192.168.100.0/24 (Attacker Network)
+- **SOC-OUT** → 192.168.200.0/24 (Victim Network)
 
-Traffic path enforced:
+Suricata operates as a dual-homed inline routing gateway:
 
-Kali → Suricata (Inspection) → DVWA
+- enp0s3 → 192.168.100.1 (SOC-IN)
+- enp0s8 → 192.168.200.1 (SOC-OUT)
 
-### Architecture Diagram
+All traffic from Kali (192.168.100.10) to DVWA (192.168.200.10) must traverse Suricata.
 
-![Suricata Architecture](assets/diagrams/Suricata%20IDS%20Architecture%20Diagram.png)
-
-Key components:
-
-- Kali Linux (Attacker)
-- Suricata IDS VM (Dual NIC Routing Gateway)
-- Ubuntu DVWA Web Server
-- Packet capture validation via tcpdump
-- Alert output via fast.log and eve.json
+No direct communication path exists between subnets.
 
 ---
 
-## Detection Engineering Approach
+# Design Principles
 
-The detection strategy follows a layered model:
+✔ Dual-homed routing gateway  
+✔ Forced inspection boundary  
+✔ Layer 3 segmentation  
+✔ Layer 4 reconnaissance detection  
+✔ Layer 7 payload inspection  
+✔ IDS mode (alert-only, no blocking)  
+✔ Deterministic attack validation  
 
-1. **ET Open baseline rule set**  
-   ~48,000+ community signatures provide broad threat detection.
-
-2. **Custom lab rules (local.rules)**  
-   Deterministic detection for:
-   - ICMP validation
-   - SYN scan detection (threshold-based)
-   - SQL Injection indicators
-   - XSS indicators
-
-3. **Packet-level validation**
-   tcpdump used to confirm:
-   - Traffic traversal
-   - Payload visibility
-   - Detection accuracy
-
-4. **Structured event logging**
-   Suricata outputs:
-   - fast.log (human-readable alerts)
-   - eve.json (structured JSON for SIEM ingestion)
-
-This mirrors real SOC environments where community signatures are supplemented with environment-specific detection logic.
+All attacker-to-target traffic passes through the inspection engine.
 
 ---
 
-## Simulated Attack Scenarios
+# Technology Stack
 
-### 1. Network Reconnaissance
-- SYN scan detection
-- ICMP path validation
+| Component | Purpose |
+|------------|----------|
+| VirtualBox | Network segmentation |
+| Kali Linux | Attacker machine |
+| Ubuntu Server | Target host |
+| DVWA | Vulnerable web application |
+| Suricata 7.x | Intrusion Detection System |
+| ET Open Rules | Community detection baseline |
+| Custom Rules | Lab-specific detection logic |
+| tcpdump | Packet-level inspection |
+| eve.json | Structured SOC logging |
 
-### 2. SQL Injection
-Payload example:
+---
+
+# Attack Scenarios Validated
+
+## Reconnaissance
+
+- ICMP Host Discovery
+- Nmap SYN Scan
+- TCP Connect Scan
+- Service Enumeration
+
+Detected:
+- SYN scan alerts
+- TCP flag anomalies
+- Suspicious scan behavior
+
+---
+
+## SQL Injection
+
+- Boolean-based injection
+- UNION-based injection
+
+Detected:
+- Custom SQLi rule
+- ET Open web attack signatures
+- Structured JSON HTTP metadata logging
+
+---
+
+## Cross-Site Scripting (XSS)
+
+- Script injection via DVWA
+- Reflected XSS payload testing
+
+Detected:
+- Custom XSS signature
+- HTTP payload inspection
+- Structured eve.json alert records
+
+---
+
+# Detection Engineering Highlights
+
+This lab integrates:
+
+### ET Open Baseline Rules
+Community threat intelligence providing broad detection coverage.
+
+### Custom Local Rules
+Developed specifically to:
+
+- Validate detection deterministically
+- Demonstrate signature authoring capability
+- Inspect HTTP payload content
+- Simulate SOC rule tuning
+
+Example:
+
 ```
-' OR 1=1 --
+alert tcp any any -> 192.168.200.10 80 (msg:"RAW SQLI UNION DETECTED"; content:"UNION"; nocase; sid:1002001; rev:1;)
 ```
 
-Detection logic:
-- URI content matching
-- HTTP inspection
+---
 
-MITRE Mapping:
-- T1190 – Exploit Public-Facing Application
+# Validation Methodology
+
+Each attack was validated at multiple layers:
+
+### Packet Level
+- tcpdump on ingress and egress interfaces
+- HTTP payload visibility confirmed
+- SYN packets observed
+
+### Alert Level
+- fast.log verification
+- SID confirmation
+- Signature validation
+
+### Structured Log Level
+- eve.json inspection
+- HTTP metadata extraction
+- Source/destination correlation
+
+This confirms full inspection pipeline integrity.
 
 ---
 
-### 3. Cross-Site Scripting (XSS)
-Payload example:
+# Evidence Structure
+
+All validation screenshots are organized under:
+
 ```
-<script>alert(1)</script>
+evidence/screenshots/
 ```
 
-Detection logic:
-- Script tag inspection
-- Encoded payload detection
+By category:
 
-MITRE Mapping:
-- T1059 – Command and Scripting Interpreter
-
----
-
-## Evidence & Validation
-
-The project includes:
-
-- Rule engine validation screenshots
-- ET Open rule count verification (~48k rules)
-- Custom rule file proof
-- Alert validation via fast.log
-- Packet capture validation using tcpdump
-- Architecture documentation
-
-Each case study in the `docs/` directory includes step-by-step analysis and screenshots.
+- 00_Architecture
+- 01_Infrastructure_Setup
+- 02_Rule_Engine_Validation
+- 03_Network_Path_Validation
+- 04_Recon_Scan
+- 05_SQLi_Case_Study
+- 06_XSS_Case_Study
 
 ---
 
-## MITRE ATT&CK Mapping
-
-| Technique | ID | Scenario |
-|-----------|----|----------|
-| Network Service Scanning | T1046 | SYN scan |
-| Exploit Public-Facing Application | T1190 | SQLi |
-| Command & Scripting Injection | T1059 | XSS |
-
-This mapping demonstrates detection alignment with standardized threat frameworks.
-
----
-
-## Limitations
-
-- DVWA is intentionally vulnerable and does not reflect hardened production systems.
-- HTTPS traffic decryption was not implemented.
-- Detection tuning was minimal due to controlled lab environment.
-- No host-based telemetry was integrated.
-
----
-
-## Future Enhancements
-
-- Integrate Suricata with Wazuh or SIEM platform
-- Enable TLS inspection testing
-- Deploy Suricata in IPS mode
-- Implement rule tuning & false positive reduction
-- Add automated alert enrichment pipeline
-- Introduce performance benchmarking
-
----
-
-## What This Project Demonstrates
+# Security Concepts Demonstrated
 
 - Network segmentation enforcement
-- IDS deployment in routing mode
-- Community signature integration (ET Open)
-- Custom detection rule development
-- Wire-level packet validation
-- Structured event analysis
-- MITRE ATT&CK alignment
-- Detection engineering mindset
+- Inline IDS architecture
+- Dual-interface routing
+- East-West traffic inspection
+- Payload-based detection
+- Reconnaissance detection engineering
+- Web attack signature validation
+- SOC-style log analysis
+- Structured event logging
 
 ---
 
-## Author
+# Project Outcome
+
+The Suricata IDS Detection Lab successfully demonstrates:
+
+✔ Proper inline IDS deployment  
+✔ Full traffic visibility across segmented networks  
+✔ Reconnaissance detection  
+✔ SQL injection detection  
+✔ XSS detection  
+✔ ET Open integration  
+✔ Custom signature engineering  
+✔ Structured alert validation  
+
+This lab reflects practical blue-team and detection engineering skills applicable to SOC and network security roles.
+
+---
+
+# Author
 
 Harshit Krishna  
 MS Cybersecurity - University of Delaware  
-Blue Team / SOC / Detection Engineering Focus
