@@ -1,4 +1,4 @@
-# Suricata IDS Detection Lab  
+# Adversary-Driven SOC Monitoring with Suricata IDS 
 ### Inline Network Inspection | Detection Engineering | Recon + Web Attack Validation
 
 ---
